@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Configuração de codificação e responsividade -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Título dinâmico passado pelo EJS -->
+    <title><%= title %></title>
+
+    <!-- Link para o arquivo de estilo -->
+    <link rel="stylesheet" href="/style/estilo_basico.css">
+</head>
+<body>
+    <div class="container">
+        <h1><%= title %></h1>
+        <p><%= message %></p>
+
+        <!-- Formulário protegido contra CSRF -->
+        <form action="/submit" method="POST">
+            <!-- Campo oculto com o token CSRF gerado pelo servidor -->
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            
+            <!-- Campo de nome -->
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+
+            <!-- Campo de email -->
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email" required>
+            </div>
+
+            <!-- Botão de envio -->
+            <button type="submit">Enviar</button>
+        </form>
+
+        <div id="success-message" class="success-message">
+            Dados enviados com sucesso!
+        </div>
+    </div>
+
+    <script>
+        // Sanitização de entrada para prevenir XSS
+        function sanitizeInput(input) {
+            return input.replace(/[&<>"']/g, function(match) {
+                const entities = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return entities[match];
+            });
+        }
+
+        // Aplicar sanitização em todos os inputs
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function(e) {
+                this.value = sanitizeInput(this.value);
+            });
+        });
+
+        // Mostrar mensagem de sucesso após envio
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const successContainer = document.getElementById('success-message');
+            
+            fetch('/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Atualiza o conteúdo da mensagem
+                successContainer.innerHTML = html;
+                // Limpa o formulário
+                this.reset();
+                
+                // Esconde a mensagem após 5 segundos
+                setTimeout(() => {
+                    successContainer.classList.remove('show');
+                    setTimeout(() => {
+                        successContainer.style.display = 'none';
+                    }, 500);
+                }, 5000);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+            });
+        });
+    </script>
+</body>
+</html>
