@@ -6,6 +6,8 @@ import csrf from 'csurf'; // Proteção contra ataques CSRF
 import helmet from 'helmet'; // Define headers de segurança
 import path from 'path'; // Manipula caminhos de diretórios
 import { fileURLToPath } from 'url'; // Utilizado para compatibilidade com ES Modules
+import { encryptFormData } from './function/functions.js';
+
 
 // Converte a URL do arquivo atual para um caminho de arquivo
 const __filename = fileURLToPath(import.meta.url);
@@ -76,18 +78,24 @@ app.get('/', (req, res) => {
     });
 });
 
+// importa e monta o roteador da pasta function
+app.use('/funcao',encryptFormData);
+
 // Rota POST para envio de formulário protegido
-app.post('/submit', csrfProtection, (req, res) => {
+app.post('/submit', csrfProtection, encryptFormData, (req, res) => {
     // Aqui poderia processar os dados recebidos do formulário
-    res.send(`
-        <div class="success-message show">
-            <div class="success-icon">✓</div>
-            <div class="success-content">
-                <h3>Sucesso!</h3>
-                <p>Dados recebidos com sucesso!</p>
-            </div>
-        </div>
-    `);
+    // res.send(`
+    //     <div class="success-message show">
+    //         <div class="success-icon">✓</div>
+    //         <div class="success-content">
+    //             <h3>Sucesso!</h3>
+    //             <p>Dados recebidos com sucesso!</p>
+    //         </div>
+    //     </div>
+    // `);
+
+    console.log('Dados recebidos:', req.body);
+    res.redirect('/funcao'); // <-- aqui redireciona para a rota montada
 });
 
 // --------------------- INICIALIZA O SERVIDOR ---------------------
