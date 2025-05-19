@@ -84,15 +84,7 @@ app.use('/funcao',encryptFormData);
 // Rota POST para envio de formulário protegido
 app.post('/submit', csrfProtection, encryptFormData, (req, res) => {
     // Aqui poderia processar os dados recebidos do formulário
-    // res.send(`
-    //     <div class="success-message show">
-    //         <div class="success-icon">✓</div>
-    //         <div class="success-content">
-    //             <h3>Sucesso!</h3>
-    //             <p>Dados recebidos com sucesso!</p>
-    //         </div>
-    //     </div>
-    // `);
+  
 
     console.log('Dados recebidos:', req.body);
     res.redirect('/funcao'); // <-- aqui redireciona para a rota montada
